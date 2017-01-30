@@ -1,5 +1,6 @@
 ﻿using LibraMage.Entities;
 using LibraMage.Results;
+using LibraMage.Renderers;
 using UnityEngine;
 
 public class LibraMageUtils
@@ -33,5 +34,15 @@ public class LibraMageUtils
         Circle tangentCirle = new Circle(intersectionToCircleCenter + intersectionPoint, circleRadius);
 
         return new TangentCircleResult(tangentCirle, firstLineUniquePoint, secondLineUniquePoint);
+    }
+    public static GameObject CreateTrajectoryRenderer(GameObject parent)
+    {
+        GameObject trajectoryRenderer = new GameObject();
+        trajectoryRenderer.transform.parent = parent.transform;
+        trajectoryRenderer.transform.position = parent.transform.position;
+        trajectoryRenderer.AddComponent<TrajectoryRenderer>();
+        trajectoryRenderer.name = "TrajectoryRenderer";
+
+        return trajectoryRenderer;
     }
 }
