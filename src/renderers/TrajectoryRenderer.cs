@@ -7,9 +7,14 @@ namespace LibraMage.Renderers
 {
     public class TrajectoryRenderer : MonoBehaviour
     {
+        private const FadeType DEFAULT_FADE_IN_TYPE = FadeType.Linear;
+        private const float DEFAULT_FADE_IN_TIME = 0.25f;
+        private const FadeType DEFAULT_FADE_OUT_TYPE = FadeType.Linear;
+        private const float DEFAULT_FADE_OUT_TIME = 0.25f;
+
         public enum FadeType
         {
-            Linear, Sinusoidal, None
+            None, Linear, Sinusoidal
         }
 
         private enum State
@@ -43,7 +48,7 @@ namespace LibraMage.Renderers
 
             set
             {
-                fadeInTime = value;
+                fadeInTime = value >= 0 ? value : 0;
             }
         }
 
@@ -71,7 +76,7 @@ namespace LibraMage.Renderers
 
             set
             {
-                fadeOutTime = value;
+                fadeOutTime = value >= 0 ? value : 0;
             }
         }
 
@@ -152,6 +157,8 @@ namespace LibraMage.Renderers
             }
         }
 
+        private bool isVisible;
+
         private List<GameObject> activePellets;
         private List<GameObject> pooledPellets;
         private List<SpriteRenderer> spriteRenderers;
@@ -168,11 +175,13 @@ namespace LibraMage.Renderers
             PoolPellet(CreatePellet());
             PoolPellet(CreatePellet());
 
-            fadeInType = FadeType.Linear;
-            fadeOutType = FadeType.Linear;
+            fadeInType = DEFAULT_FADE_IN_TYPE;
+            fadeOutType = DEFAULT_FADE_OUT_TYPE;
 
-            fadeInTime = 0.25f;
-            fadeOutTime = 0.25f;
+            fadeInTime = DEFAULT_FADE_IN_TIME;
+            fadeOutTime = DEFAULT_FADE_OUT_TIME;
+
+            isVisible = false;
 
             state = State.Stopped;
         }
@@ -190,6 +199,62 @@ namespace LibraMage.Renderers
             if (state == State.Stopped)
             {
                 return;
+            }
+        }
+
+        public void Show()
+        {
+            if (!isVisible)
+            {
+                StopAllCoroutines();
+                StartCoroutine(Fade_Coroutine(true));
+                isVisible = true;
+            }
+        }
+
+        public void Hide()
+        {
+            if (isVisible)
+            {
+                StopAllCoroutines();
+                StartCoroutine(Fade_Coroutine(false));
+                isVisible = false;
+            }
+        }
+
+        private IEnumerator Fade_Coroutine(bool isFadingIn)
+        {
+            var fadeType = isFadingIn ? fadeInType : fadeOutType;
+            var fadeTime = isFadingIn ? fadeInTime : fadeOutTime;
+
+            if (fadeType == FadeType.None || fadeTime == 0f)
+            {
+                foreach (SpriteRenderer spriteRenderer in spriteRenderers)
+                {
+                    var color = spriteRenderer.color;
+                    color.a = isFadingIn ? 1f : 0f;
+                    spriteRenderer.color = color;
+                }
+
+                yield return null;
+            }
+
+            else
+            {
+                float timeElapsed = 0f;
+
+                while (timeElapsed <= fadeTime)
+                {
+                    foreach (SpriteRenderer spriteRenderer in spriteRenderers)
+                    {
+                        var color = spriteRenderer.color;
+                        color.a = isFadingIn ? timeElapsed / fadeTime : 1 - (timeElapsed / fadeTime);
+                        spriteRenderer.color = color;
+                    }
+
+                    timeElapsed += Time.fixedDeltaTime;
+                    yield return new WaitForFixedUpdate();
+                }
             }
         }
 
