@@ -129,6 +129,27 @@ namespace LibraMage.Renderers
             }
         }
 
+        private float opacity;
+        public float Opacity
+        {
+            get
+            {
+                return opacity;
+            }
+
+            set
+            {
+                opacity = Mathf.Clamp(value, 0f, 1f);
+
+                foreach (SpriteRenderer spriteRenderer in spriteRenderers)
+                {
+                    var color = spriteRenderer.color;
+                    color.a = opacity;
+                    spriteRenderer.color = color;
+                }
+            }
+        }
+
         private float gravity;
         public float Gravity
         {
@@ -183,6 +204,8 @@ namespace LibraMage.Renderers
 
             isVisible = false;
 
+            opacity = 1f;
+
             state = State.Stopped;
         }
 
@@ -232,7 +255,7 @@ namespace LibraMage.Renderers
                 foreach (SpriteRenderer spriteRenderer in spriteRenderers)
                 {
                     var color = spriteRenderer.color;
-                    color.a = isFadingIn ? 1f : 0f;
+                    color.a = isFadingIn ? opacity : 0f;
                     spriteRenderer.color = color;
                 }
 
@@ -249,6 +272,7 @@ namespace LibraMage.Renderers
                     {
                         var color = spriteRenderer.color;
                         color.a = isFadingIn ? timeElapsed / fadeTime : 1 - (timeElapsed / fadeTime);
+                        color.a *= opacity;
                         spriteRenderer.color = color;
                     }
 
@@ -264,6 +288,11 @@ namespace LibraMage.Renderers
             pellet.transform.parent = transform;
             SpriteRenderer spriteRenderer = pellet.AddComponent<SpriteRenderer>();
             spriteRenderer.sprite = sprite;
+
+            var color = spriteRenderer.color;
+            color.a = opacity;
+            spriteRenderer.color = color;
+
             spriteRenderers.Add(spriteRenderer);
 
             return pellet;
