@@ -141,11 +141,14 @@ namespace LibraMage.Renderers
             {
                 opacity = Mathf.Clamp(value, 0f, 1f);
 
-                foreach (SpriteRenderer spriteRenderer in spriteRenderers)
+                if (isVisible)
                 {
-                    var color = spriteRenderer.color;
-                    color.a = opacity;
-                    spriteRenderer.color = color;
+                    foreach (SpriteRenderer spriteRenderer in spriteRenderers)
+                    {
+                        var color = spriteRenderer.color;
+                        color.a = opacity;
+                        spriteRenderer.color = color;
+                    }
                 }
             }
         }
@@ -290,7 +293,7 @@ namespace LibraMage.Renderers
             spriteRenderer.sprite = sprite;
 
             var color = spriteRenderer.color;
-            color.a = opacity;
+            color.a = isVisible ? opacity : 0f;
             spriteRenderer.color = color;
 
             spriteRenderers.Add(spriteRenderer);
