@@ -17,6 +17,11 @@ namespace LibraMage.Renderers
             None, Linear, Sinusoidal
         }
 
+        public enum DistanceMeasure
+        {
+            Actual, Horizontal, Vertical
+        }
+
         private enum State
         {
             Playing, Paused, Stopped
@@ -80,8 +85,21 @@ namespace LibraMage.Renderers
             }
         }
 
+        private FadeType lineOfSightFadeType;
+        public FadeType LineOfSightFadeType
+        {
+            get
+            {
+                return lineOfSightFadeType;
+            }
+
+            set
+            {
+                lineOfSightFadeType = value;
+            }
+        }
+
         private float lineOfSight;
-        private float lineOfSightSquared;
         public float LineOfSight
         {
             get
@@ -92,7 +110,20 @@ namespace LibraMage.Renderers
             set
             {
                 lineOfSight = value >= 0 ? value : 0;
-                lineOfSightSquared = lineOfSight * lineOfSight;
+            }
+        }
+
+        private DistanceMeasure lineOfSightConstraint;
+        public DistanceMeasure LineOfSightConstraint
+        {
+            get
+            {
+                return lineOfSightConstraint;
+            }
+
+            set
+            {
+                lineOfSightConstraint = value;
             }
         }
 
@@ -122,7 +153,7 @@ namespace LibraMage.Renderers
             {
                 sprite = value;
 
-                foreach (SpriteRenderer spriteRenderer in spriteRenderers)
+                foreach (SpriteRenderer spriteRenderer in spriteRenderers.Values)
                 {
                     spriteRenderer.sprite = sprite;
                 }
@@ -143,7 +174,7 @@ namespace LibraMage.Renderers
 
                 if (isVisible)
                 {
-                    foreach (SpriteRenderer spriteRenderer in spriteRenderers)
+                    foreach (SpriteRenderer spriteRenderer in spriteRenderers.Values)
                     {
                         var color = spriteRenderer.color;
                         color.a = opacity;
@@ -182,16 +213,25 @@ namespace LibraMage.Renderers
         }
 
         private bool isVisible;
+        public bool IsVisible
+        {
+            get
+            {
+                return isVisible;
+            }
+        }
 
         private List<GameObject> activePellets;
         private List<GameObject> pooledPellets;
-        private List<SpriteRenderer> spriteRenderers;
+        private Dictionary<GameObject, SpriteRenderer> spriteRenderers;
+        private Dictionary<SpriteRenderer, float> savedPelletOpacities;
 
         private void Awake()
         {
             activePellets = new List<GameObject>();
             pooledPellets = new List<GameObject>();
-            spriteRenderers = new List<SpriteRenderer>();
+            spriteRenderers = new Dictionary<GameObject, SpriteRenderer>();
+            savedPelletOpacities = new Dictionary<SpriteRenderer, float>();
 
             PoolPellet(CreatePellet());
             PoolPellet(CreatePellet());
@@ -208,6 +248,10 @@ namespace LibraMage.Renderers
             isVisible = false;
 
             opacity = 1f;
+
+            lineOfSight = 10f;
+            lineOfSightConstraint = DistanceMeasure.Actual;
+            lineOfSightFadeType = FadeType.None;
 
             state = State.Stopped;
         }
@@ -255,11 +299,10 @@ namespace LibraMage.Renderers
 
             if (fadeType == FadeType.None || fadeTime == 0f)
             {
-                foreach (SpriteRenderer spriteRenderer in spriteRenderers)
+                foreach (SpriteRenderer spriteRenderer in spriteRenderers.Values)
                 {
-                    var color = spriteRenderer.color;
-                    color.a = isFadingIn ? opacity : 0f;
-                    spriteRenderer.color = color;
+                    var savedOpacity = savedPelletOpacities[spriteRenderer];
+                    SetPelletOpacity(spriteRenderer.gameObject, isFadingIn ? savedOpacity : 0f, false);
                 }
 
                 yield return null;
@@ -271,12 +314,10 @@ namespace LibraMage.Renderers
 
                 while (timeElapsed <= fadeTime)
                 {
-                    foreach (SpriteRenderer spriteRenderer in spriteRenderers)
+                    foreach (SpriteRenderer spriteRenderer in spriteRenderers.Values)
                     {
-                        var color = spriteRenderer.color;
-                        color.a = isFadingIn ? timeElapsed / fadeTime : 1 - (timeElapsed / fadeTime);
-                        color.a *= opacity;
-                        spriteRenderer.color = color;
+                        var savedOpacity = savedPelletOpacities[spriteRenderer];
+                        SetPelletOpacity(spriteRenderer.gameObject, savedOpacity * (isFadingIn ? timeElapsed / fadeTime : 1 - (timeElapsed / fadeTime)), false);
                     }
 
                     timeElapsed += Time.fixedDeltaTime;
@@ -292,11 +333,10 @@ namespace LibraMage.Renderers
             SpriteRenderer spriteRenderer = pellet.AddComponent<SpriteRenderer>();
             spriteRenderer.sprite = sprite;
 
-            var color = spriteRenderer.color;
-            color.a = isVisible ? opacity : 0f;
-            spriteRenderer.color = color;
+            spriteRenderers.Add(pellet, spriteRenderer);
+            savedPelletOpacities.Add(spriteRenderer, 0f);
 
-            spriteRenderers.Add(spriteRenderer);
+            SetPelletOpacity(pellet, isVisible ? opacity : 0f);
 
             return pellet;
         }
@@ -328,16 +368,6 @@ namespace LibraMage.Renderers
             pooledPellets.Add(pellet);
         }
 
-        public void PositionPellet(GameObject pellet, float time)
-        {
-            float y = gravity * time * time * 0.5f + initialVelocity.y * time + transform.position.y;
-            float x = initialVelocity.x * time + transform.position.x;
-
-            Vector3 position = new Vector3(x, y, pellet.transform.position.z);
-
-            pellet.transform.position = position;
-        }
-
         public void OnForceUpdate(Vector2 initialVelocity)
         {
             this.initialVelocity = initialVelocity;
@@ -355,12 +385,24 @@ namespace LibraMage.Renderers
             for (; i < activePellets.Count; i++)
             {
                 PositionPellet(activePellets[i], timeCovered);
+                AdjustPelletOpacity(activePellets[i], distanceCovered);
 
                 timeCovered += timeStep;
 
                 if (i != 0)
                 {
-                    distanceCovered += Vector3.Distance(activePellets[i].transform.position, activePellets[i - 1].transform.position);
+                    switch (lineOfSightConstraint)
+                    {
+                        case DistanceMeasure.Actual:
+                            distanceCovered += Vector3.Distance(activePellets[i].transform.position, activePellets[i - 1].transform.position);
+                            break;
+                        case DistanceMeasure.Horizontal:
+                            distanceCovered += activePellets[i].transform.position.x - activePellets[i - 1].transform.position.x;
+                            break;
+                        case DistanceMeasure.Vertical:
+                            distanceCovered += activePellets[i].transform.position.y - activePellets[i - 1].transform.position.y;
+                            break;
+                    }
                 }
 
                 if (distanceCovered >= lineOfSight)
@@ -379,6 +421,50 @@ namespace LibraMage.Renderers
                 PoolPellet(activePellets[i]);
                 activePellets.RemoveAt(i);
                 i--;
+            }
+        }
+
+        private void PositionPellet(GameObject pellet, float time)
+        {
+            float y = gravity * time * time * 0.5f + initialVelocity.y * time + transform.position.y;
+            float x = initialVelocity.x * time + transform.position.x;
+
+            Vector3 position = new Vector3(x, y, pellet.transform.position.z);
+
+            pellet.transform.position = position;
+        }
+
+        private void AdjustPelletOpacity(GameObject pellet, float distanceCovered)
+        {
+            SpriteRenderer spriteRenderer = spriteRenderers[pellet];
+
+            switch (lineOfSightFadeType)
+            {
+                case FadeType.None:
+                    SetPelletOpacity(pellet, opacity);
+                    break;
+                case FadeType.Linear:
+                    var effectiveOpacity = 1 - (distanceCovered / lineOfSight);
+                    effectiveOpacity = Mathf.Clamp(effectiveOpacity, 0f, 1f);
+                    SetPelletOpacity(pellet, effectiveOpacity);
+                    break;
+                default:
+                    SetPelletOpacity(pellet, opacity);
+                    break;
+            }
+        }
+
+        private void SetPelletOpacity(GameObject pellet, float opacity, bool saveOpacity = true)
+        {
+            SpriteRenderer spriteRenderer = spriteRenderers[pellet];
+
+            var color = spriteRenderer.color;
+            color.a = opacity;
+            spriteRenderer.color = color;
+
+            if (saveOpacity)
+            {
+                savedPelletOpacities[spriteRenderer] = opacity;
             }
         }
     }
