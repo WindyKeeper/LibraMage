@@ -184,8 +184,8 @@ namespace LibraMage.Renderers
             }
         }
 
-        private float gravity;
-        public float Gravity
+        private Vector2 gravity;
+        public Vector2 Gravity
         {
             get
             {
@@ -276,9 +276,9 @@ namespace LibraMage.Renderers
         {
             if (!isVisible)
             {
+                isVisible = true;
                 StopAllCoroutines();
                 StartCoroutine(Fade_Coroutine(true));
-                isVisible = true;
             }
         }
 
@@ -286,9 +286,9 @@ namespace LibraMage.Renderers
         {
             if (isVisible)
             {
+                isVisible = false;
                 StopAllCoroutines();
                 StartCoroutine(Fade_Coroutine(false));
-                isVisible = false;
             }
         }
 
@@ -426,9 +426,9 @@ namespace LibraMage.Renderers
 
         private void PositionPellet(GameObject pellet, float time)
         {
-            float y = gravity * time * time * 0.5f + initialVelocity.y * time + transform.position.y;
-            float x = initialVelocity.x * time + transform.position.x;
-
+            float x = gravity.x * time * time * 0.5f + initialVelocity.x * time + transform.position.x;
+            float y = gravity.y * time * time * 0.5f + initialVelocity.y * time + transform.position.y;
+            
             Vector3 position = new Vector3(x, y, pellet.transform.position.z);
 
             pellet.transform.position = position;
