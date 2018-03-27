@@ -394,7 +394,7 @@ namespace LibraMage.Renderers
                     switch (lineOfSightConstraint)
                     {
                         case DistanceMeasure.Actual:
-                            distanceCovered += Vector3.Distance(activePellets[i].transform.position, activePellets[i - 1].transform.position);
+                            distanceCovered += LibraMageUtils.GetVectorDistance2D(activePellets[i].transform.position - activePellets[i - 1].transform.position);
                             break;
                         case DistanceMeasure.Horizontal:
                             distanceCovered += activePellets[i].transform.position.x - activePellets[i - 1].transform.position.x;

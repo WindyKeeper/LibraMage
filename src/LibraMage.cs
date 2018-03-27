@@ -35,6 +35,7 @@ public class LibraMageUtils
 
         return new TangentCircleResult(tangentCirle, firstLineUniquePoint, secondLineUniquePoint);
     }
+
     public static GameObject CreateTrajectoryRenderer(GameObject parent)
     {
         GameObject trajectoryRenderer = new GameObject();
@@ -44,5 +45,10 @@ public class LibraMageUtils
         trajectoryRenderer.name = "TrajectoryRenderer";
 
         return trajectoryRenderer;
+    }
+
+    public static float GetVectorDistance2D(Vector3 vector)
+    {
+        return Mathf.Sqrt(vector.x * vector.x + vector.y * vector.y);
     }
 }
