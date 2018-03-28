@@ -285,14 +285,14 @@ namespace LibraMage
             return pellet;
         }
 
-        public void PoolPellet(GameObject pellet)
+        private void PoolPellet(GameObject pellet)
         {
             pellet.SetActive(false);
 
             pooledPellets.Add(pellet);
         }
 
-        public void OnForceUpdate(Vector2 initialVelocity)
+        public void OnInitialVelocityUpdate(Vector2 initialVelocity)
         {
             InitialVelocity = initialVelocity;
 
