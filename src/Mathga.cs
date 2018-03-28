@@ -37,7 +37,7 @@ namespace LibraMage
             return new TangentCircleResult(tangentCirle, firstLineUniquePoint, secondLineUniquePoint);
         }
 
-        public static float GetVectorDistance2D(Vector3 vector)
+        public static float GetVectorMagnitude2D(Vector3 vector)
         {
             return Mathf.Sqrt(vector.x * vector.x + vector.y * vector.y);
         }

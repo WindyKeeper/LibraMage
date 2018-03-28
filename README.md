@@ -8,6 +8,7 @@ LibraMage also serves as a tribute to Final Fantasy, one of my favorite video ga
 LibraMage has two entry points for its functionality: the classes Mathga and Physicsga. Both classes are static and, in conjunction, act as LibraMage's main interface. Mathga exposes the math methods, while Physicsga exposes the physics ones.
 
 ## Mathga
+#### GetCircleTangentToTwoLines
 ```cs
 TangentCircleResult GetCircleTangentToTwoLines(Vector2 intersectionPoint, Vector2 firstLineUniquePoint, Vector2 secondLineUniquePoint,
                                                             float circleRadius)
@@ -22,8 +23,7 @@ GetCircleTangentToTwoLines returns a circle that is tangent to any two non-paral
 
 * ```circleRadius (float)``` The radius of the desired circle (an infinite number of tangent circles exists).
 
-
-
+#### GetVectorDistance2D
 ```cs
 float GetVectorDistance2D(Vector3 vector)
 ```
@@ -31,9 +31,8 @@ GetVectorDistance2D returns the magnitude of a vector while ignoring the Z-compo
 
 * ```vector (Vector3)``` The vector to use.
 
-
-
 ## Physicsga
+#### CreateTrajectoryRenderer
 ```cs
 TrajectoryRenderer CreateTrajectoryRenderer(Transform parentTransform)
 ```
@@ -41,11 +40,8 @@ CreateTrajectoryRenderer automatically creates a GameObject, attaches a Trajecto
 
 * ```parentTransform (Transform)``` The transform that should parent the trajectory renderer. In most cases, it should be the transform of the projectile itself.
 
-
-
 ## Renderers
-
-### TrajectoryRenderer
+#### TrajectoryRenderer
 
 TrajectoryRenderer is a component that predicts trajectories of moving objects and renders them in world space. Its function, appearance, and behavior are customizable according to the following properties:
 

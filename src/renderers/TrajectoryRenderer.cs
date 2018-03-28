@@ -318,7 +318,7 @@ namespace LibraMage
                     switch (LineOfSightConstraint)
                     {
                         case DistanceMeasure.Actual:
-                            distanceCovered += Mathga.GetVectorDistance2D(activePellets[i].transform.position - activePellets[i - 1].transform.position);
+                            distanceCovered += Mathga.GetVectorMagnitude2D(activePellets[i].transform.position - activePellets[i - 1].transform.position);
                             break;
                         case DistanceMeasure.Horizontal:
                             distanceCovered += activePellets[i].transform.position.x - activePellets[i - 1].transform.position.x;
