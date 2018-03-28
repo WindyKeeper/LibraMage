@@ -46,7 +46,8 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\entities\Circle.cs" />
-    <Compile Include="src\LibraMage.cs" />
+    <Compile Include="src\Mathga.cs" />
+    <Compile Include="src\Physicsga.cs" />
     <Compile Include="src\renderers\TrajectoryRenderer.cs" />
     <Compile Include="src\results\TangentCircleResult.cs" />
   </ItemGroup>

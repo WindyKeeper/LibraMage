@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace LibraMage.Entities
+namespace LibraMage
 {
     public struct Circle
     {

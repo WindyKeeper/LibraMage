@@ -1,43 +1,18 @@
-﻿using LibraMage.Entities;
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace LibraMage.Results
+namespace LibraMage
 {
     public struct TangentCircleResult
     {
-        private Circle circle;
-        private Vector2 firstIntersectionPoint;
-        private Vector2 secondIntersectionPoint;
-
-        public Circle Circle
-        {
-            get
-            {
-                return circle;
-            }
-        }
-
-        public Vector2 FirstIntersectionPoint
-        {
-            get
-            {
-                return firstIntersectionPoint;
-            }
-        }
-
-        public Vector2 SecondIntersectionPoint
-        {
-            get
-            {
-                return secondIntersectionPoint;
-            }
-        }
+        public Circle Circle { get; }
+        public Vector2 FirstIntersectionPoint { get; }
+        public Vector2 SecondIntersectionPoint { get; }
 
         internal TangentCircleResult(Circle circle, Vector2 firstIntersectionPoint, Vector2 secondIntersectionPoint)
         {
-            this.circle = circle;
-            this.firstIntersectionPoint = firstIntersectionPoint;
-            this.secondIntersectionPoint = secondIntersectionPoint;
+            Circle = circle;
+            FirstIntersectionPoint = firstIntersectionPoint;
+            SecondIntersectionPoint = secondIntersectionPoint;
         }
     }
 }

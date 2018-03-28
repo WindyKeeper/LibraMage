@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace LibraMage.Renderers
+namespace LibraMage
 {
     public class TrajectoryRenderer : MonoBehaviour
     {
@@ -29,19 +28,7 @@ namespace LibraMage.Renderers
 
         private State state;
 
-        private FadeType fadeInType;
-        public FadeType FadeInType
-        {
-            get
-            {
-                return fadeInType;
-            }
-
-            set
-            {
-                fadeInType = value;
-            }
-        }
+        public FadeType FadeInType { get; set; }
 
         private float fadeInTime;
         public float FadeInTime
@@ -57,19 +44,7 @@ namespace LibraMage.Renderers
             }
         }
 
-        private FadeType fadeOutType;
-        public FadeType FadeOutType
-        {
-            get
-            {
-                return fadeOutType;
-            }
-
-            set
-            {
-                fadeOutType = value;
-            }
-        }
+        public FadeType FadeOutType { get; set; }
 
         private float fadeOutTime;
         public float FadeOutTime
@@ -85,19 +60,7 @@ namespace LibraMage.Renderers
             }
         }
 
-        private FadeType lineOfSightFadeType;
-        public FadeType LineOfSightFadeType
-        {
-            get
-            {
-                return lineOfSightFadeType;
-            }
-
-            set
-            {
-                lineOfSightFadeType = value;
-            }
-        }
+        public FadeType LineOfSightFadeType { get; set; }
 
         private float lineOfSight;
         public float LineOfSight
@@ -113,19 +76,7 @@ namespace LibraMage.Renderers
             }
         }
 
-        private DistanceMeasure lineOfSightConstraint;
-        public DistanceMeasure LineOfSightConstraint
-        {
-            get
-            {
-                return lineOfSightConstraint;
-            }
-
-            set
-            {
-                lineOfSightConstraint = value;
-            }
-        }
+        public DistanceMeasure LineOfSightConstraint { get; set; }
 
         private float timeStep;
         public float TimeStep
@@ -172,7 +123,7 @@ namespace LibraMage.Renderers
             {
                 opacity = Mathf.Clamp(value, 0f, 1f);
 
-                if (isVisible)
+                if (IsVisible)
                 {
                     foreach (SpriteRenderer spriteRenderer in spriteRenderers.Values)
                     {
@@ -184,47 +135,18 @@ namespace LibraMage.Renderers
             }
         }
 
-        private Vector2 gravity;
-        public Vector2 Gravity
-        {
-            get
-            {
-                return gravity;
-            }
+        public Vector2 Gravity { get; set; }
 
-            set
-            {
-                gravity = value;
-            }
-        }
+        public Vector2 InitialVelocity { get; set; }
 
-        private Vector2 initialVelocity;
-        public Vector2 InitialVelocity
-        {
-            get
-            {
-                return initialVelocity;
-            }
-
-            set
-            {
-                initialVelocity = value;
-            }
-        }
-
-        private bool isVisible;
-        public bool IsVisible
-        {
-            get
-            {
-                return isVisible;
-            }
-        }
+        public bool IsVisible { get; private set; }
 
         private List<GameObject> activePellets;
         private List<GameObject> pooledPellets;
         private Dictionary<GameObject, SpriteRenderer> spriteRenderers;
         private Dictionary<SpriteRenderer, float> savedPelletOpacities;
+
+        new Transform transform;
 
         private void Awake()
         {
@@ -233,25 +155,27 @@ namespace LibraMage.Renderers
             spriteRenderers = new Dictionary<GameObject, SpriteRenderer>();
             savedPelletOpacities = new Dictionary<SpriteRenderer, float>();
 
+            transform = GetComponent<Transform>();
+
             PoolPellet(CreatePellet());
             PoolPellet(CreatePellet());
             PoolPellet(CreatePellet());
             PoolPellet(CreatePellet());
             PoolPellet(CreatePellet());
 
-            fadeInType = DEFAULT_FADE_IN_TYPE;
-            fadeOutType = DEFAULT_FADE_OUT_TYPE;
+            FadeInType = DEFAULT_FADE_IN_TYPE;
+            FadeOutType = DEFAULT_FADE_OUT_TYPE;
 
             fadeInTime = DEFAULT_FADE_IN_TIME;
             fadeOutTime = DEFAULT_FADE_OUT_TIME;
 
-            isVisible = false;
+            IsVisible = false;
 
             opacity = 1f;
 
             lineOfSight = 10f;
-            lineOfSightConstraint = DistanceMeasure.Actual;
-            lineOfSightFadeType = FadeType.None;
+            LineOfSightConstraint = DistanceMeasure.Actual;
+            LineOfSightFadeType = FadeType.None;
 
             state = State.Stopped;
         }
@@ -274,9 +198,9 @@ namespace LibraMage.Renderers
 
         public void Show()
         {
-            if (!isVisible)
+            if (!IsVisible)
             {
-                isVisible = true;
+                IsVisible = true;
                 StopAllCoroutines();
                 StartCoroutine(Fade_Coroutine(true));
             }
@@ -284,9 +208,9 @@ namespace LibraMage.Renderers
 
         public void Hide()
         {
-            if (isVisible)
+            if (IsVisible)
             {
-                isVisible = false;
+                IsVisible = false;
                 StopAllCoroutines();
                 StartCoroutine(Fade_Coroutine(false));
             }
@@ -294,7 +218,7 @@ namespace LibraMage.Renderers
 
         private IEnumerator Fade_Coroutine(bool isFadingIn)
         {
-            var fadeType = isFadingIn ? fadeInType : fadeOutType;
+            var fadeType = isFadingIn ? FadeInType : FadeOutType;
             var fadeTime = isFadingIn ? fadeInTime : fadeOutTime;
 
             if (fadeType == FadeType.None || fadeTime == 0f)
@@ -336,7 +260,7 @@ namespace LibraMage.Renderers
             spriteRenderers.Add(pellet, spriteRenderer);
             savedPelletOpacities.Add(spriteRenderer, 0f);
 
-            SetPelletOpacity(pellet, isVisible ? opacity : 0f);
+            SetPelletOpacity(pellet, IsVisible ? opacity : 0f);
 
             return pellet;
         }
@@ -370,7 +294,7 @@ namespace LibraMage.Renderers
 
         public void OnForceUpdate(Vector2 initialVelocity)
         {
-            this.initialVelocity = initialVelocity;
+            InitialVelocity = initialVelocity;
 
             float distanceCovered = 0f;
             float timeCovered = 0f;
@@ -391,10 +315,10 @@ namespace LibraMage.Renderers
 
                 if (i != 0)
                 {
-                    switch (lineOfSightConstraint)
+                    switch (LineOfSightConstraint)
                     {
                         case DistanceMeasure.Actual:
-                            distanceCovered += LibraMageUtils.GetVectorDistance2D(activePellets[i].transform.position - activePellets[i - 1].transform.position);
+                            distanceCovered += Mathga.GetVectorDistance2D(activePellets[i].transform.position - activePellets[i - 1].transform.position);
                             break;
                         case DistanceMeasure.Horizontal:
                             distanceCovered += activePellets[i].transform.position.x - activePellets[i - 1].transform.position.x;
@@ -426,8 +350,8 @@ namespace LibraMage.Renderers
 
         private void PositionPellet(GameObject pellet, float time)
         {
-            float x = gravity.x * time * time * 0.5f + initialVelocity.x * time + transform.position.x;
-            float y = gravity.y * time * time * 0.5f + initialVelocity.y * time + transform.position.y;
+            float x = Gravity.x * time * time * 0.5f + InitialVelocity.x * time + transform.position.x;
+            float y = Gravity.y * time * time * 0.5f + InitialVelocity.y * time + transform.position.y;
             
             Vector3 position = new Vector3(x, y, pellet.transform.position.z);
 
@@ -438,7 +362,7 @@ namespace LibraMage.Renderers
         {
             SpriteRenderer spriteRenderer = spriteRenderers[pellet];
 
-            switch (lineOfSightFadeType)
+            switch (LineOfSightFadeType)
             {
                 case FadeType.None:
                     SetPelletOpacity(pellet, opacity);
