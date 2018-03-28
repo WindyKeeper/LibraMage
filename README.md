@@ -7,7 +7,7 @@ LibraMage also serves as a tribute to Final Fantasy, one of my favorite video ga
 # Documentation
 LibraMage has two entry points for its functionality: the classes Mathga and Physicsga. Both classes are static and, in conjunction, act as LibraMage's main interface. Mathga exposes the math methods, while Physicsga exposes the physics ones.
 
-##Mathga
+## Mathga
 ```cs
 TangentCircleResult GetCircleTangentToTwoLines(Vector2 intersectionPoint, Vector2 firstLineUniquePoint, Vector2 secondLineUniquePoint,
                                                             float circleRadius)
@@ -22,6 +22,8 @@ GetCircleTangentToTwoLines returns a circle that is tangent to any two non-paral
 
 * ```circleRadius (float)``` The radius of the desired circle (an infinite number of tangent circles exists).
 
+
+
 ```cs
 float GetVectorDistance2D(Vector3 vector)
 ```
@@ -29,7 +31,9 @@ GetVectorDistance2D returns the magnitude of a vector while ignoring the Z-compo
 
 * ```vector (Vector3)``` The vector to use.
 
-##Physicsga
+
+
+## Physicsga
 ```cs
 TrajectoryRenderer CreateTrajectoryRenderer(Transform parentTransform)
 ```
@@ -37,7 +41,9 @@ CreateTrajectoryRenderer automatically creates a GameObject, attaches a Trajecto
 
 * ```parentTransform (Transform)``` The transform that should parent the trajectory renderer. In most cases, it should be the transform of the projectile itself.
 
-##Renderers
+
+
+## Renderers
 
 ### TrajectoryRenderer
 
@@ -66,6 +72,7 @@ TrajectoryRenderer is a component that predicts trajectories of moving objects a
 * ```FadeOutTime (float)``` Similar to FadeInTime.
 
 After the TrajectoryRenderer is configured, it has to be constantly notified of any initial velocity changes. Be sure to call its OnInitialVelocityUpdate(Vector2) method whenever applicable.
+
 
 Here's an example configuration:
 
