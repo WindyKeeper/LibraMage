@@ -88,16 +88,3 @@ Somewhere in FixedUpdate:
 ```
 trajectoryRenderer.OnInitialVelocityUpdate((slingShotAnchorPoint - transform.position) * LAUNCH_FORCE_COEFFICIENT);
 ```
-
-# Examples
-The following are some examples of where and how I use LibraMage in my projects.
-#### Fat Bunny: Rounded Corners
-![Fat Bunny](img/GetTangentCircleExample.png)
-
-In Fat Bunny, the lines of the mountainous terrain have rounded corners at the places where they intersect. Those rounded corners are actually part of a circle that is tangent to the sloped line and the flat line. Mathga.GetCircleTangentToTwoLines is being used to find the circle. 
-
-
-#### Fat Bunny: Trajectory Prediction
-![Fat Bunny](img/TrajectoryPredictionExample.png)
-
-In Fat Bunny, one feature we've decided to experiment with is trajectory rendering. It shows the path the bunny will follow in the air after he jumps. Physicsga.CreateTrajectoryRenderer is being used to get such a trajectory renderer.
